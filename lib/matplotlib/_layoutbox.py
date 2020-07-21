@@ -30,16 +30,13 @@ def get_renderer(fig):
         renderer = fig._cachedRenderer
     else:
         canvas = fig.canvas
-        if canvas and hasattr(canvas, "get_renderer"):
-            renderer = canvas.get_renderer()
-        else:
+        if not canvas or not hasattr(canvas, "get_renderer"):
             # not sure if this can happen
             # seems to with PDF...
             _log.info("constrained_layout : falling back to Agg renderer")
             from matplotlib.backends.backend_agg import FigureCanvasAgg
             canvas = FigureCanvasAgg(fig)
-            renderer = canvas.get_renderer()
-
+        renderer = canvas.get_renderer()
     return renderer
 
 
@@ -201,17 +198,11 @@ class LayoutBox:
 
     def soft_constraints(self):
         sol = self.solver
-        if self.tightwidth:
-            suggest = 0.
-        else:
-            suggest = 20.
+        suggest = 0. if self.tightwidth else 20.
         c = (self.pref_width == suggest)
         for i in c:
             sol.addConstraint(i | 'required')
-        if self.tightheight:
-            suggest = 0.
-        else:
-            suggest = 20.
+        suggest = 0. if self.tightheight else 20.
         c = (self.pref_height == suggest)
         for i in c:
             sol.addConstraint(i | 'required')
@@ -364,10 +355,7 @@ class LayoutBox:
         Find children of this layout box that are subplots.  We want to line
         poss up, and this is an easy way to find them all.
         """
-        if self.subplot:
-            subplots = [self]
-        else:
-            subplots = []
+        subplots = [self] if self.subplot else []
         for child in self.children:
             subplots += child.find_child_subplots()
         return subplots
@@ -541,7 +529,7 @@ def align(boxes, attr, strength='strong'):
 def match_top_margins(boxes, levels=1):
     box0 = boxes[0]
     top0 = box0
-    for n in range(levels):
+    for _ in range(levels):
         top0 = top0.parent
     for box in boxes[1:]:
         topb = box
@@ -554,7 +542,7 @@ def match_top_margins(boxes, levels=1):
 def match_bottom_margins(boxes, levels=1):
     box0 = boxes[0]
     top0 = box0
-    for n in range(levels):
+    for _ in range(levels):
         top0 = top0.parent
     for box in boxes[1:]:
         topb = box
@@ -567,7 +555,7 @@ def match_bottom_margins(boxes, levels=1):
 def match_left_margins(boxes, levels=1):
     box0 = boxes[0]
     top0 = box0
-    for n in range(levels):
+    for _ in range(levels):
         top0 = top0.parent
     for box in boxes[1:]:
         topb = box
@@ -580,7 +568,7 @@ def match_left_margins(boxes, levels=1):
 def match_right_margins(boxes, levels=1):
     box0 = boxes[0]
     top0 = box0
-    for n in range(levels):
+    for _ in range(levels):
         top0 = top0.parent
     for box in boxes[1:]:
         topb = box

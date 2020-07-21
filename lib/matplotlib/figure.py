@@ -502,11 +502,13 @@ class Figure(Artist):
         ----------
         constrained : bool or dict or None
         """
-        self._constrained_layout_pads = dict()
-        self._constrained_layout_pads['w_pad'] = None
-        self._constrained_layout_pads['h_pad'] = None
-        self._constrained_layout_pads['wspace'] = None
-        self._constrained_layout_pads['hspace'] = None
+        self._constrained_layout_pads = {
+            'w_pad': None,
+            'h_pad': None,
+            'wspace': None,
+            'hspace': None,
+        }
+
         if constrained is None:
             constrained = mpl.rcParams['figure.constrained_layout.use']
         self._constrained = bool(constrained)
@@ -1679,7 +1681,7 @@ default: 'top'
                 A flat dict of all of the Axes created.
             """
             rows, cols = layout.shape
-            output = dict()
+            output = {}
 
             # create the Axes at this level of nesting
             for name in unique_ids:
@@ -2526,14 +2528,12 @@ default: 'top'
               if (np.isfinite(b.width) and np.isfinite(b.height)
                   and (b.width != 0 or b.height != 0))]
 
-        if len(bb) == 0:
+        if not bb:
             return self.bbox_inches
 
         _bbox = Bbox.union(bb)
 
-        bbox_inches = TransformedBbox(_bbox, Affine2D().scale(1 / self.dpi))
-
-        return bbox_inches
+        return TransformedBbox(_bbox, Affine2D().scale(1 / self.dpi))
 
     def init_layoutbox(self):
         """Initialize the layoutbox for use in constrained_layout."""

@@ -11,6 +11,7 @@ See wire3d_animation_demo for another simple example of animating a 3D plot.
 intentionally takes a long time to run)
 """
 
+
 from mpl_toolkits.mplot3d import axes3d
 import matplotlib.pyplot as plt
 
@@ -22,7 +23,7 @@ X, Y, Z = axes3d.get_test_data(0.1)
 ax.plot_wireframe(X, Y, Z, rstride=5, cstride=5)
 
 # rotate the axes and update
-for angle in range(0, 360):
+for angle in range(360):
     ax.view_init(30, angle)
     plt.draw()
     plt.pause(.001)

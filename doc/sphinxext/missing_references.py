@@ -194,12 +194,12 @@ def save_missing_references_handler(app, exc):
 
     _warn_unused_missing_references(app)
 
-    json_path = (Path(app.confdir) /
-                 app.config.missing_references_filename)
-
-    references_warnings = getattr(app.env, 'missing_references_warnings', {})
-
     if app.config.missing_references_write_json:
+        json_path = (Path(app.confdir) /
+                     app.config.missing_references_filename)
+
+        references_warnings = getattr(app.env, 'missing_references_warnings', {})
+
         _write_missing_references_json(references_warnings, json_path)
 
 

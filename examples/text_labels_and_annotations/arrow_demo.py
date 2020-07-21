@@ -189,16 +189,16 @@ def make_arrow_plot(data, size=4, display='length', shape='right',
         sx, cx = y_scale, x_scale
 
         where = label_positions[pair]
-        if where == 'left':
-            orig_position = 3 * np.array([[max_arrow_width, max_arrow_width]])
-        elif where == 'absolute':
+        if where == 'absolute':
             orig_position = np.array([[max_arrow_length / 2.0,
-                                       3 * max_arrow_width]])
-        elif where == 'right':
-            orig_position = np.array([[length - 3 * max_arrow_width,
                                        3 * max_arrow_width]])
         elif where == 'center':
             orig_position = np.array([[length / 2.0, 3 * max_arrow_width]])
+        elif where == 'left':
+            orig_position = 3 * np.array([[max_arrow_width, max_arrow_width]])
+        elif where == 'right':
+            orig_position = np.array([[length - 3 * max_arrow_width,
+                                       3 * max_arrow_width]])
         else:
             raise ValueError("Got unknown position parameter %s" % where)
 
@@ -293,11 +293,7 @@ if __name__ == '__main__':
     if d is None:
         d = all_on_max
         scaled = False
-    if len(argv) > 2:
-        display = argv[2]
-    else:
-        display = 'length'
-
+    display = argv[2] if len(argv) > 2 else 'length'
     size = 4
     plt.figure(figsize=(size, size))
 

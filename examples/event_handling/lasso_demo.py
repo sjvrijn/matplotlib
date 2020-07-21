@@ -25,10 +25,7 @@ class Datum:
     def __init__(self, x, y, include=False):
         self.x = x
         self.y = y
-        if include:
-            self.color = self.colorin
-        else:
-            self.color = self.colorout
+        self.color = self.colorin if include else self.colorout
 
 
 class LassoManager:
@@ -56,11 +53,7 @@ class LassoManager:
         p = path.Path(verts)
         ind = p.contains_points(self.xys)
         for i in range(len(self.xys)):
-            if ind[i]:
-                facecolors[i] = Datum.colorin
-            else:
-                facecolors[i] = Datum.colorout
-
+            facecolors[i] = Datum.colorin if ind[i] else Datum.colorout
         self.canvas.draw_idle()
         self.canvas.widgetlock.release(self.lasso)
         del self.lasso

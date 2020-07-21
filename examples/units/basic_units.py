@@ -37,8 +37,7 @@ class PassThroughProxy:
 
     def __call__(self, *args):
         fn = getattr(self.target, self.fn_name)
-        ret = fn(*args)
-        return ret
+        return fn(*args)
 
 
 class ConvertArgsProxy(PassThroughProxy):
@@ -53,7 +52,7 @@ class ConvertArgsProxy(PassThroughProxy):
                 converted_args.append(a.convert_to(self.unit))
             except AttributeError:
                 converted_args.append(TaggedValue(a, self.unit))
-        converted_args = tuple([c.get_value() for c in converted_args])
+        converted_args = tuple(c.get_value() for c in converted_args)
         return PassThroughProxy.__call__(self, *converted_args)
 
 
@@ -186,7 +185,7 @@ class BasicUnit:
         if fullname is None:
             fullname = name
         self.fullname = fullname
-        self.conversions = dict()
+        self.conversions = {}
 
     def __repr__(self):
         return f'BasicUnit({self.name})'
@@ -200,7 +199,7 @@ class BasicUnit:
     def __mul__(self, rhs):
         value = rhs
         unit = self
-        if hasattr(rhs, 'get_unit'):
+        if hasattr(value, 'get_unit'):
             value = rhs.get_value()
             unit = rhs.get_unit()
             unit = unit_resolver('__mul__', (self, unit))
@@ -234,8 +233,7 @@ class BasicUnit:
 
     def convert_value_to(self, value, unit):
         conversion_fn = self.conversions[unit]
-        ret = conversion_fn(value)
-        return ret
+        return conversion_fn(value)
 
     def get_unit(self):
         return self
@@ -291,11 +289,7 @@ secs.add_conversion_factor(minutes, 1/60.0)
 
 # radians formatting
 def rad_fn(x, pos=None):
-    if x >= 0:
-        n = int((x / np.pi) * 2.0 + 0.25)
-    else:
-        n = int((x / np.pi) * 2.0 - 0.25)
-
+    n = int((x / np.pi) * 2.0 + 0.25) if x >= 0 else int((x / np.pi) * 2.0 - 0.25)
     if n == 0:
         return '0'
     elif n == 1:

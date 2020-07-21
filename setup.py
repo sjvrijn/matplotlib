@@ -143,10 +143,7 @@ class BuildExtraLibraries(BuildExtCommand):
                 if 'gcc' in version:
                     ranlib = shutil.which('gcc-ranlib')
                 elif 'clang' in version:
-                    if sys.platform == 'darwin':
-                        ranlib = True
-                    else:
-                        ranlib = shutil.which('llvm-ranlib')
+                    ranlib = True if sys.platform == 'darwin' else shutil.which('llvm-ranlib')
         if ranlib and has_flag(self.compiler, '-flto'):
             for ext in self.extensions:
                 ext.extra_compile_args.append('-flto')
@@ -185,9 +182,13 @@ package_data = {}  # Will be filled below by the various components.
 
 # If the user just queries for information, don't bother figuring out which
 # packages to build or install.
-if not (any('--' + opt in sys.argv
-            for opt in Distribution.display_option_names + ['help'])
-        or 'clean' in sys.argv):
+if (
+    all(
+        '--' + opt not in sys.argv
+        for opt in Distribution.display_option_names + ['help']
+    )
+    and 'clean' not in sys.argv
+):
     # Go through all of the packages and figure out which ones we are
     # going to build/install.
     print_raw()

@@ -148,11 +148,7 @@ class ContourLabeler:
         # Detect if manual selection is desired and remove from argument list.
         self.labelManual = manual
         self.rightside_up = rightside_up
-        if zorder is None:
-            self._clabel_zorder = 2+self._contour_zorder
-        else:
-            self._clabel_zorder = zorder
-
+        self._clabel_zorder = 2+self._contour_zorder if zorder is None else zorder
         if levels is None:
             levels = self.levels
             indices = list(range(len(self.cvalues)))
@@ -283,15 +279,8 @@ class ContourLabeler:
 
         # Number of contour points
         nsize = len(linecontour)
-        if labelwidth > 1:
-            xsize = int(np.ceil(nsize / labelwidth))
-        else:
-            xsize = 1
-        if xsize == 1:
-            ysize = nsize
-        else:
-            ysize = int(labelwidth)
-
+        xsize = int(np.ceil(nsize / labelwidth)) if labelwidth > 1 else 1
+        ysize = nsize if xsize == 1 else int(labelwidth)
         XX = np.resize(linecontour[:, 0], (xsize, ysize))
         YY = np.resize(linecontour[:, 1], (xsize, ysize))
         # I might have fouled up the following:
@@ -404,10 +393,9 @@ class ContourLabeler:
 
     def _get_label_text(self, x, y, rotation):
         dx, dy = self.axes.transData.inverted().transform((x, y))
-        t = text.Text(dx, dy, rotation=rotation,
+        return text.Text(dx, dy, rotation=rotation,
                       horizontalalignment='center',
                       verticalalignment='center', zorder=self._clabel_zorder)
-        return t
 
     def _get_label_clabeltext(self, x, y, rotation):
         # x, y, rotation is given in pixel coordinate. Convert them to
@@ -418,11 +406,9 @@ class ContourLabeler:
         dx, dy = transDataInv.transform((x, y))
         drotation = transDataInv.transform_angles(np.array([rotation]),
                                                   np.array([[x, y]]))
-        t = ClabelText(dx, dy, rotation=drotation[0],
+        return ClabelText(dx, dy, rotation=drotation[0],
                        horizontalalignment='center',
                        verticalalignment='center', zorder=self._clabel_zorder)
-
-        return t
 
     def _add_label(self, t, x, y, lev, cvalue):
         color = self.labelMappable.to_rgba(cvalue, alpha=self.alpha)
@@ -569,11 +555,7 @@ class ContourLabeler:
                 # zero in print_label and locate_label.  Other than these
                 # functions, this is not necessary and should probably be
                 # eventually removed.
-                if _is_closed_polygon(lc):
-                    slc = np.row_stack([slc0, slc0[1:2]])
-                else:
-                    slc = slc0
-
+                slc = np.row_stack([slc0, slc0[1:2]]) if _is_closed_polygon(lc) else slc0
                 # Check if long enough for a label
                 if self.print_label(slc, lw):
                     x, y, ind = self.locate_label(slc, lw)
@@ -1163,11 +1145,7 @@ class ContourSet(cm.ScalarMappable, ContourLabeler):
         # (Colorbar needs this even for line contours.)
         self._levels = list(self.levels)
 
-        if self.logscale:
-            lower, upper = 1e-250, 1e250
-        else:
-            lower, upper = -1e250, 1e250
-
+        lower, upper = (1e-250, 1e250) if self.logscale else (-1e250, 1e250)
         if self.extend in ('both', 'min'):
             self._levels.insert(0, lower)
         if self.extend in ('both', 'max'):
@@ -1246,7 +1224,7 @@ class ContourSet(cm.ScalarMappable, ContourLabeler):
                 linewidths = list(linewidths)
                 if len(linewidths) < Nlev:
                     nreps = int(np.ceil(Nlev / len(linewidths)))
-                    linewidths = linewidths * nreps
+                    linewidths *= nreps
                 if len(linewidths) > Nlev:
                     linewidths = linewidths[:Nlev]
             tlinewidths = [(w,) for w in linewidths]
@@ -1270,7 +1248,7 @@ class ContourSet(cm.ScalarMappable, ContourLabeler):
                 tlinestyles = list(linestyles)
                 if len(tlinestyles) < Nlev:
                     nreps = int(np.ceil(Nlev / len(linestyles)))
-                    tlinestyles = tlinestyles * nreps
+                    tlinestyles *= nreps
                 if len(tlinestyles) > Nlev:
                     tlinestyles = tlinestyles[:Nlev]
             else:
@@ -1442,10 +1420,7 @@ class QuadContourSet(ContourSet):
         return allsegs, allkinds
 
     def _contour_args(self, args, kwargs):
-        if self.filled:
-            fn = 'contourf'
-        else:
-            fn = 'contour'
+        fn = 'contourf' if self.filled else 'contour'
         Nargs = len(args)
         if Nargs <= 2:
             z = ma.asarray(args[0], dtype=np.float64)

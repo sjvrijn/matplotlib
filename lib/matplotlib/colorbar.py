@@ -434,10 +434,7 @@ class ColorbarBase:
         if norm is None:
             norm = colors.Normalize()
         if extend is None:
-            if hasattr(norm, 'extend'):
-                extend = norm.extend
-            else:
-                extend = 'neither'
+            extend = norm.extend if hasattr(norm, 'extend') else 'neither'
         self.alpha = alpha
         self.cmap = cmap
         self.norm = norm
@@ -635,10 +632,7 @@ class ColorbarBase:
         else:
             self.ax.set_xscale('linear')
             self.ax.set_yscale('linear')
-            if type(self.norm) is colors.Normalize:
-                self.__scale = 'linear'
-            else:
-                self.__scale = 'manual'
+            self.__scale = 'linear' if type(self.norm) is colors.Normalize else 'manual'
 
     def update_ticks(self):
         """
@@ -756,7 +750,7 @@ class ColorbarBase:
         """
         _pos_xy = 'y' if self.orientation == 'vertical' else 'x'
         _protected_kw = [_pos_xy, 'horizontalalignment', 'ha']
-        if any([k in kwargs for k in _protected_kw]):
+        if any(k in kwargs for k in _protected_kw):
             if loc is not None:
                 raise TypeError(f'Specifying *loc* is disallowed when any of '
                                 f'its corresponding low level keyword '
@@ -951,7 +945,7 @@ class ColorbarBase:
             if self._extend_lower():
                 b = [b[0] - 1] + b
             if self._extend_upper():
-                b = b + [b[-1] + 1]
+                b += [b[-1] + 1]
             b = np.array(b)
             v = np.zeros(len(b) - 1)
             bi = self.norm.boundaries
@@ -1162,8 +1156,7 @@ class ColorbarBase:
             bunique = bunique[:-1]
             yunique = yunique[:-1]
 
-        z = np.interp(xn, bunique, yunique)
-        return z
+        return np.interp(xn, bunique, yunique)
 
     def set_alpha(self, alpha):
         """Set the transparency between 0 (transparent) and 1 (opaque)."""
@@ -1437,7 +1430,7 @@ def make_axes(parents, location=None, orientation=None, fraction=0.15,
     pad = kw.pop('pad', pad0)
 
     fig = parents[0].get_figure()
-    if not all(fig is ax.get_figure() for ax in parents):
+    if any(fig is not ax.get_figure() for ax in parents):
         raise ValueError('Unable to create a colorbar axes as not all '
                          'parents share the same figure.')
 
@@ -1478,19 +1471,8 @@ def make_axes(parents, location=None, orientation=None, fraction=0.15,
 
     # OK, now make a layoutbox for the cb axis.  Later, we will use this
     # to make the colorbar fit nicely.
-    if not using_constrained_layout:
-        # no layout boxes:
-        lb = None
-        lbpos = None
-        # and we need to set the aspect ratio by hand...
-        cax.set_aspect(aspect, anchor=anchor, adjustable='box')
-    else:
-        if not parents_iterable:
-            # this is a single axis...
-            ax = parents[0]
-            lb, lbpos = constrained_layout.layoutcolorbarsingle(
-                    ax, cax, shrink, aspect, location, pad=pad)
-        else:  # there is more than one parent, so lets use gridspec
+    if using_constrained_layout:
+        if parents_iterable:  # there is more than one parent, so lets use gridspec
             # the colorbar will be a sibling of this gridspec, so the
             # parent is the same parent as the gridspec.  Either the figure,
             # or a subplotspec.
@@ -1498,6 +1480,17 @@ def make_axes(parents, location=None, orientation=None, fraction=0.15,
             lb, lbpos = constrained_layout.layoutcolorbargridspec(
                     parents, cax, shrink, aspect, location, pad)
 
+        else:
+            # this is a single axis...
+            ax = parents[0]
+            lb, lbpos = constrained_layout.layoutcolorbarsingle(
+                    ax, cax, shrink, aspect, location, pad=pad)
+    else:
+        # no layout boxes:
+        lb = None
+        lbpos = None
+        # and we need to set the aspect ratio by hand...
+        cax.set_aspect(aspect, anchor=anchor, adjustable='box')
     cax._layoutbox = lb
     cax._poslayoutbox = lbpos
 

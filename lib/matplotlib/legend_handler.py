@@ -380,13 +380,12 @@ class HandlerRegularPolyCollection(HandlerNpointsYoffsets):
         legend_handle.set_clip_path(None)
 
     def create_collection(self, orig_handle, sizes, offsets, transOffset):
-        p = type(orig_handle)(orig_handle.get_numsides(),
+        return type(orig_handle)(orig_handle.get_numsides(),
                               rotation=orig_handle.get_rotation(),
                               sizes=sizes,
                               offsets=offsets,
                               transOffset=transOffset,
                               )
-        return p
 
     def create_artists(self, legend, orig_handle,
                        xdescent, ydescent, width, height, fontsize,
@@ -412,22 +411,20 @@ class HandlerRegularPolyCollection(HandlerNpointsYoffsets):
 class HandlerPathCollection(HandlerRegularPolyCollection):
     r"""Handler for `.PathCollection`\s, which are used by `~.Axes.scatter`."""
     def create_collection(self, orig_handle, sizes, offsets, transOffset):
-        p = type(orig_handle)([orig_handle.get_paths()[0]],
+        return type(orig_handle)([orig_handle.get_paths()[0]],
                               sizes=sizes,
                               offsets=offsets,
                               transOffset=transOffset,
                               )
-        return p
 
 
 class HandlerCircleCollection(HandlerRegularPolyCollection):
     r"""Handler for `.CircleCollection`\s."""
     def create_collection(self, orig_handle, sizes, offsets, transOffset):
-        p = type(orig_handle)(sizes,
+        return type(orig_handle)(sizes,
                               offsets=offsets,
                               transOffset=transOffset,
                               )
-        return p
 
 
 class HandlerErrorbar(HandlerLine2D):
@@ -593,11 +590,7 @@ class HandlerStem(HandlerNpointsYoffsets):
         ydata = self.get_ydata(legend, xdescent, ydescent,
                                width, height, fontsize)
 
-        if self._bottom is None:
-            bottom = 0.
-        else:
-            bottom = self._bottom
-
+        bottom = 0. if self._bottom is None else self._bottom
         leg_markerline = Line2D(xdata_marker, ydata[:len(xdata_marker)])
         self.update_prop(leg_markerline, markerline, legend)
 
@@ -660,11 +653,7 @@ class HandlerTuple(HandlerBase):
 
         handler_map = legend.get_legend_handler_map()
 
-        if self._ndivide is None:
-            ndivide = len(orig_handle)
-        else:
-            ndivide = self._ndivide
-
+        ndivide = len(orig_handle) if self._ndivide is None else self._ndivide
         if self._pad is None:
             pad = legend.borderpad * fontsize
         else:

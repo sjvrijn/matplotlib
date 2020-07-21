@@ -535,10 +535,7 @@ class FreeType(SetupPackage):
             # Statically link to the locally-built freetype.
             # This is certainly broken on Windows.
             ext.include_dirs.insert(0, str(src_path / 'include'))
-            if sys.platform == 'win32':
-                libfreetype = 'libfreetype.lib'
-            else:
-                libfreetype = 'libfreetype.a'
+            libfreetype = 'libfreetype.lib' if sys.platform == 'win32' else 'libfreetype.a'
             ext.extra_objects.insert(
                 0, str(src_path / 'objs' / '.libs' / libfreetype))
             ext.define_macros.append(('FREETYPE_BUILD_TYPE', 'local'))
@@ -551,11 +548,7 @@ class FreeType(SetupPackage):
         src_path = Path('build', f'freetype-{LOCAL_FREETYPE_VERSION}')
 
         # We've already built freetype
-        if sys.platform == 'win32':
-            libfreetype = 'libfreetype.lib'
-        else:
-            libfreetype = 'libfreetype.a'
-
+        libfreetype = 'libfreetype.lib' if sys.platform == 'win32' else 'libfreetype.a'
         # bailing because it is already built
         if (src_path / 'objs' / '.libs' / libfreetype).is_file():
             return

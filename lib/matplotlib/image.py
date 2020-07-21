@@ -95,7 +95,7 @@ def composite_images(images, renderer, magnification=1.0):
             bboxes.append(
                 Bbox([[x, y], [x + data.shape[1], y + data.shape[0]]]))
 
-    if len(parts) == 0:
+    if not parts:
         return np.empty((0, 0, 4), dtype=np.uint8), 0, 0
 
     bbox = Bbox.union(bboxes)
@@ -206,10 +206,7 @@ def _rgb_to_rgba(A):
     """
     rgba = np.zeros((A.shape[0], A.shape[1], 4), dtype=A.dtype)
     rgba[:, :, :3] = A
-    if rgba.dtype == np.uint8:
-        rgba[:, :, 3] = 255
-    else:
-        rgba[:, :, 3] = 1.0
+    rgba[:, :, 3] = 255 if rgba.dtype == np.uint8 else 1.0
     return rgba
 
 
@@ -701,8 +698,9 @@ class _ImageBase(martist.Artist, cm.ScalarMappable):
             # If just one dimension assume scalar and apply colormap
             self._A = self._A[:, :, 0]
 
-        if not (self._A.ndim == 2
-                or self._A.ndim == 3 and self._A.shape[-1] in [3, 4]):
+        if self._A.ndim != 2 and (
+            self._A.ndim != 3 or self._A.shape[-1] not in [3, 4]
+        ):
             raise TypeError("Invalid shape {} for image data"
                             .format(self._A.shape))
 
@@ -1448,21 +1446,16 @@ def imread(fname, format=None):
             parsed = urllib.parse.urlparse(fname)
             # If the string is a URL (Windows paths appear as if they have a
             # length-1 scheme), assume png.
-            if len(parsed.scheme) > 1:
-                ext = 'png'
-            else:
-                ext = Path(fname).suffix.lower()[1:]
-        elif hasattr(fname, 'geturl'):  # Returned by urlopen().
+            ext = 'png' if len(parsed.scheme) > 1 else Path(fname).suffix.lower()[1:]
+        elif hasattr(fname, 'geturl') or not hasattr(fname, 'name'):  # Returned by urlopen().
             # We could try to parse the url's path and use the extension, but
             # returning png is consistent with the block above.  Note that this
             # if clause has to come before checking for fname.name as
             # urlopen("file:///...") also has a name attribute (with the fixed
             # value "<urllib response>").
             ext = 'png'
-        elif hasattr(fname, 'name'):
-            ext = Path(fname.name).suffix.lower()[1:]
         else:
-            ext = 'png'
+            ext = Path(fname.name).suffix.lower()[1:]
     else:
         ext = format
     img_open = (

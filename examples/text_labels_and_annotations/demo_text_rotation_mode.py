@@ -38,7 +38,7 @@ def test_rotation_mode(fig, mode, subplot_location):
     grid.axes_row[0][1].set_title(f"rotation_mode='{mode}'", size="large")
 
     if mode == "default":
-        kw = dict()
+        kw = {}
     else:
         kw = dict(
             bbox=dict(boxstyle="square,pad=0.", ec="none", fc="C1", alpha=0.3))

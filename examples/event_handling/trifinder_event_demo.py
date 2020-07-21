@@ -14,20 +14,14 @@ import numpy as np
 
 
 def update_polygon(tri):
-    if tri == -1:
-        points = [0, 0, 0]
-    else:
-        points = triang.triangles[tri]
+    points = [0, 0, 0] if tri == -1 else triang.triangles[tri]
     xs = triang.x[points]
     ys = triang.y[points]
     polygon.set_xy(np.column_stack([xs, ys]))
 
 
 def on_mouse_move(event):
-    if event.inaxes is None:
-        tri = -1
-    else:
-        tri = trifinder(event.xdata, event.ydata)
+    tri = -1 if event.inaxes is None else trifinder(event.xdata, event.ydata)
     update_polygon(tri)
     plt.title('In triangle %i' % tri)
     event.canvas.draw()

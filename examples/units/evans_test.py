@@ -31,7 +31,7 @@ class FooConverter(units.ConversionInterface):
     @staticmethod
     def axisinfo(unit, axis):
         """Return the Foo AxisInfo."""
-        if unit == 1.0 or unit == 2.0:
+        if unit in [1.0, 2.0]:
             return units.AxisInfo(
                 majloc=ticker.IndexLocator(8, 0),
                 majfmt=ticker.FormatStrFormatter("VAL: %s"),
