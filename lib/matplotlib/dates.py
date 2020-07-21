@@ -1310,8 +1310,15 @@ class AutoDateLocator(DateLocator):
             # If we use 4 then we get: 1, 5, ... 25, 29, 1
             self.intervald[DAILY] = [1, 2, 4, 7, 14]
 
-        self._byranges = [None, range(1, 13), range(1, 32),
-                          range(0, 24), range(0, 60), range(0, 60), None]
+        self._byranges = [
+            None,
+            range(1, 13),
+            range(1, 32),
+            range(24),
+            range(60),
+            range(60),
+            None,
+        ]
 
     def __call__(self):
         # docstring inherited
@@ -1968,11 +1975,7 @@ class _rcParam_helper:
         and `date.interval_multiples` are changed.  Called by the helpers
         above.
         """
-        if cls.conv_st == 'concise':
-            converter = ConciseDateConverter
-        else:
-            converter = DateConverter
-
+        converter = ConciseDateConverter if cls.conv_st == 'concise' else DateConverter
         interval_multiples = cls.int_mult
         convert = converter(interval_multiples=interval_multiples)
         units.registry[np.datetime64] = convert

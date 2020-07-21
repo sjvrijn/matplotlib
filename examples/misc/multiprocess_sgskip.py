@@ -94,7 +94,7 @@ class NBPlot:
 
 def main():
     pl = NBPlot()
-    for ii in range(10):
+    for _ in range(10):
         pl.plot()
         time.sleep(0.5)
     pl.plot(finished=True)

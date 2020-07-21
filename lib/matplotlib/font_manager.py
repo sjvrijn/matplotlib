@@ -1323,11 +1323,7 @@ class FontManager:
         if fname is not None:
             return fname
 
-        if fontext == 'afm':
-            fontlist = self.afmlist
-        else:
-            fontlist = self.ttflist
-
+        fontlist = self.afmlist if fontext == 'afm' else self.ttflist
         best_score = 1e64
         best_font = None
 

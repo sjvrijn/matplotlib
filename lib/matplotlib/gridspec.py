@@ -94,8 +94,7 @@ class GridSpecBase:
             The number of rows and columns the subplot should span in the grid.
         """
         loc1, loc2 = loc
-        subplotspec = self[loc1:loc1+rowspan, loc2:loc2+colspan]
-        return subplotspec
+        return self[loc1:loc1+rowspan, loc2:loc2+colspan]
 
     def set_width_ratios(self, width_ratios):
         """

@@ -96,11 +96,7 @@ class MenuItem(artist.Artist):
         self.label.draw(renderer)
 
     def set_hover_props(self, b):
-        if b:
-            props = self.hoverprops
-        else:
-            props = self.props
-
+        props = self.hoverprops if b else self.props
         r, g, b = props.labelcolor_rgb
         self.labelArray[:, :, 0] = r
         self.labelArray[:, :, 1] = g
@@ -140,8 +136,8 @@ class Menu:
         width = maxw + 2*MenuItem.padx
         height = maxh + MenuItem.pady
 
+        left = x0
         for item in menuitems:
-            left = x0
             bottom = y0 - maxh - MenuItem.pady
 
             item.set_extent(left, bottom, width, height)

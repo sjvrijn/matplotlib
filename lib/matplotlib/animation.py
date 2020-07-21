@@ -97,7 +97,7 @@ class MovieWriterRegistry:
     """Registry of available writer classes by human readable name."""
 
     def __init__(self):
-        self._registered = dict()
+        self._registered = {}
 
     @cbook.deprecated("3.2")
     def set_dirty(self):
@@ -454,7 +454,7 @@ class FileMovieWriter(MovieWriter):
             self.temp_prefix = frame_prefix
         self._clear_temp = clear_temp
         self._frame_counter = 0  # used for generating sequential file names
-        self._temp_paths = list()
+        self._temp_paths = []
         self.fname_format_str = '%s%%07d.%s'
 
     @cbook.deprecated("3.3")
@@ -571,7 +571,7 @@ class FFMpegBase:
     @property
     def output_args(self):
         args = []
-        if not Path(self.outfile).suffix == '.gif':
+        if Path(self.outfile).suffix != '.gif':
             args.extend(['-vcodec', self.codec])
         extra_args = (self.extra_args if self.extra_args is not None
                       else mpl.rcParams[self._args_key])
@@ -836,27 +836,26 @@ class HTMLWriter(FileMovieWriter):
         self._clear_temp = False
 
     def grab_frame(self, **savefig_kwargs):
-        if self.embed_frames:
-            # Just stop processing if we hit the limit
-            if self._hit_limit:
-                return
-            f = BytesIO()
-            self.fig.savefig(f, format=self.frame_format,
-                             dpi=self.dpi, **savefig_kwargs)
-            imgdata64 = base64.encodebytes(f.getvalue()).decode('ascii')
-            self._total_bytes += len(imgdata64)
-            if self._total_bytes >= self._bytes_limit:
-                _log.warning(
-                    "Animation size has reached %s bytes, exceeding the limit "
-                    "of %s. If you're sure you want a larger animation "
-                    "embedded, set the animation.embed_limit rc parameter to "
-                    "a larger value (in MB). This and further frames will be "
-                    "dropped.", self._total_bytes, self._bytes_limit)
-                self._hit_limit = True
-            else:
-                self._saved_frames.append(imgdata64)
-        else:
+        if not self.embed_frames:
             return super().grab_frame(**savefig_kwargs)
+        # Just stop processing if we hit the limit
+        if self._hit_limit:
+            return
+        f = BytesIO()
+        self.fig.savefig(f, format=self.frame_format,
+                         dpi=self.dpi, **savefig_kwargs)
+        imgdata64 = base64.encodebytes(f.getvalue()).decode('ascii')
+        self._total_bytes += len(imgdata64)
+        if self._total_bytes >= self._bytes_limit:
+            _log.warning(
+                "Animation size has reached %s bytes, exceeding the limit "
+                "of %s. If you're sure you want a larger animation "
+                "embedded, set the animation.embed_limit rc parameter to "
+                "a larger value (in MB). This and further frames will be "
+                "dropped.", self._total_bytes, self._bytes_limit)
+            self._hit_limit = True
+        else:
+            self._saved_frames.append(imgdata64)
 
     def finish(self):
         # save the frames to an html file
@@ -873,10 +872,10 @@ class HTMLWriter(FileMovieWriter):
                          reflect_checked='')
         mode_dict[self.default_mode + '_checked'] = 'checked'
 
-        interval = 1000 // self.fps
-
         with open(self.outfile, 'w') as of:
             of.write(JS_INCLUDE + STYLE_INCLUDE)
+            interval = 1000 // self.fps
+
             of.write(DISPLAY_TEMPLATE.format(id=uuid.uuid4().hex,
                                              Nframes=Nframes,
                                              fill_frames=fill_frames,
@@ -1112,10 +1111,8 @@ class Animation:
         # canvas._is_saving = True makes the draw_event animation-starting
         # callback a no-op; canvas.manager = None prevents resizing the GUI
         # widget (both are likewise done in savefig()).
-        with mpl.rc_context({'savefig.bbox': None}), \
-             writer.saving(self._fig, filename, dpi), \
-             cbook._setattr_cm(self._fig.canvas,
-                               _is_saving=True, manager=None):
+        with mpl.rc_context({'savefig.bbox': None}), writer.saving(self._fig, filename, dpi), cbook._setattr_cm(self._fig.canvas,
+                                   _is_saving=True, manager=None):
             for anim in all_anim:
                 anim._init_draw()  # Clear the initial frame
             frame_number = 0
@@ -1123,10 +1120,7 @@ class Animation:
             #       attribute. Can we generalize this to all Animations?
             save_count_list = [getattr(a, 'save_count', None)
                                for a in all_anim]
-            if None in save_count_list:
-                total_frames = None
-            else:
-                total_frames = sum(save_count_list)
+            total_frames = None if None in save_count_list else sum(save_count_list)
             for data in zip(*[a.new_saved_frame_seq() for a in all_anim]):
                 for anim, d in zip(all_anim, data):
                     # TODO: See if turning off blit is really necessary
@@ -1234,7 +1228,7 @@ class Animation:
     def _setup_blit(self):
         # Setting up the blit requires: a cache of the background for the
         # axes
-        self._blit_cache = dict()
+        self._blit_cache = {}
         self._drawn_artists = []
         self._resize_id = self._fig.canvas.mpl_connect('resize_event',
                                                        self._on_resize)

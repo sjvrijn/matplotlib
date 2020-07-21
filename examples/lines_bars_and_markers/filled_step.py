@@ -139,9 +139,9 @@ def stack_hist(ax, stacked_data, sty_cycle, bottoms=None,
         plot_kwargs = {}
     print(plot_kwargs)
     try:
-        l_keys = stacked_data.keys()
         label_data = True
         if labels is None:
+            l_keys = stacked_data.keys()
             labels = l_keys
 
     except AttributeError:

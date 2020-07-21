@@ -161,8 +161,7 @@ class MathSymbolTableDirective(Directive):
 def setup(app):
     app.add_directive("math_symbol_table", MathSymbolTableDirective)
 
-    metadata = {'parallel_read_safe': True, 'parallel_write_safe': True}
-    return metadata
+    return {'parallel_read_safe': True, 'parallel_write_safe': True}
 
 
 if __name__ == "__main__":

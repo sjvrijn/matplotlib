@@ -290,11 +290,7 @@ class Dvi:
 
         # convert from TeX's "scaled points" to dpi units
         d = self.dpi / (72.27 * 2**16)
-        if self.baseline is None:
-            descent = (maxy - maxy_pure) * d
-        else:
-            descent = self.baseline
-
+        descent = (maxy - maxy_pure) * d if self.baseline is None else self.baseline
         text = [Text((x-minx)*d, (maxy-y)*d - descent, f, g, w*d)
                 for (x, y, f, g, w) in self.text]
         boxes = [Box((x-minx)*d, (maxy-y)*d - descent, h*d, w*d)

@@ -37,7 +37,7 @@ xs = np.linspace(0., 10., 26)
 # The ith polygon will appear on the plane y = zs[i]
 zs = range(4)
 
-for i in zs:
+for _ in zs:
     ys = np.random.rand(len(xs))
     verts.append(polygon_under_graph(xs, ys))
 

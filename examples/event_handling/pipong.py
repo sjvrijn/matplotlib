@@ -46,7 +46,7 @@ class Pad:
         if type == 'r':
             self.xoffset *= -1.0
 
-        if type == 'l' or type == 'r':
+        if type in ['l', 'r']:
             self.signx = -1.0
             self.signy = 1.0
         else:
@@ -66,10 +66,7 @@ class Puck:
 
     def _reset(self, pad):
         self.x = pad.x + pad.xoffset
-        if pad.y < 0:
-            self.y = pad.y + pad.yoffset
-        else:
-            self.y = pad.y - pad.yoffset
+        self.y = pad.y + pad.yoffset if pad.y < 0 else pad.y - pad.yoffset
         self.vx = pad.x - self.x
         self.vy = pad.y + pad.w/2 - self.y
         self._speedlimit()
@@ -240,31 +237,31 @@ class Game:
     def on_key_press(self, event):
         if event.key == '3':
             self.res *= 5.0
-        if event.key == '4':
+        elif event.key == '4':
             self.res /= 5.0
 
-        if event.key == 'e':
-            self.pads[0].y += .1
-            if self.pads[0].y > 1 - .3:
-                self.pads[0].y = 1 - .3
-        if event.key == 'd':
+        elif event.key == 'a':
+            self.pucks.append(Puck(self.puckdisp,
+                                   self.pads[randint(2)],
+                                   self.ax.bbox))
+        elif event.key == 'd':
             self.pads[0].y -= .1
             if self.pads[0].y < -1:
                 self.pads[0].y = -1
 
-        if event.key == 'i':
+        elif event.key == 'e':
+            self.pads[0].y += .1
+            if self.pads[0].y > 1 - .3:
+                self.pads[0].y = 1 - .3
+        elif event.key == 'i':
             self.pads[1].y += .1
             if self.pads[1].y > 1 - .3:
                 self.pads[1].y = 1 - .3
-        if event.key == 'k':
+        elif event.key == 'k':
             self.pads[1].y -= .1
             if self.pads[1].y < -1:
                 self.pads[1].y = -1
 
-        if event.key == 'a':
-            self.pucks.append(Puck(self.puckdisp,
-                                   self.pads[randint(2)],
-                                   self.ax.bbox))
         if event.key == 'A' and len(self.pucks):
             self.pucks.pop()
         if event.key == ' ' and len(self.pucks):
@@ -272,19 +269,19 @@ class Game:
         if event.key == '1':
             for p in self.pucks:
                 p._slower()
-        if event.key == '2':
+        elif event.key == '2':
             for p in self.pucks:
                 p._faster()
 
-        if event.key == 'n':
+        elif event.key == 'g':
+            self.on = not self.on
+        elif event.key == 'n':
             self.distract = not self.distract
 
-        if event.key == 'g':
-            self.on = not self.on
-        if event.key == 't':
+        elif event.key == 'q':
+            plt.close()
+        elif event.key == 't':
             self.inst = not self.inst
             self.i.set_visible(not self.i.get_visible())
             self.background = None
             self.canvas.draw_idle()
-        if event.key == 'q':
-            plt.close()

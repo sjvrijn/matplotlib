@@ -434,16 +434,12 @@ class RendererBase:
                 if Nlinestyles:
                     gc0.set_dashes(*linestyles[i % Nlinestyles])
                 fg = edgecolors[i % Nedgecolors]
-                if len(fg) == 4:
-                    if fg[3] == 0.0:
-                        gc0.set_linewidth(0)
-                    else:
-                        gc0.set_foreground(fg)
+                if len(fg) == 4 and fg[3] == 0.0:
+                    gc0.set_linewidth(0)
                 else:
                     gc0.set_foreground(fg)
-            if rgbFace is not None and len(rgbFace) == 4:
-                if rgbFace[3] == 0:
-                    rgbFace = None
+            if rgbFace is not None and len(rgbFace) == 4 and rgbFace[3] == 0:
+                rgbFace = None
             gc0.set_antialiased(antialiaseds[i % Naa])
             if Nurls:
                 gc0.set_url(urls[i % Nurls])
@@ -1725,9 +1721,8 @@ class FigureCanvasBase:
         rif = getattr(cls, "required_interactive_framework", None)
         backend2gui_rif = {"qt5": "qt", "qt4": "qt", "gtk3": "gtk3",
                            "wx": "wx", "macosx": "osx"}.get(rif)
-        if backend2gui_rif:
-            if _is_non_interactive_terminal_ipython(ip):
-                ip.enable_gui(backend2gui_rif)
+        if backend2gui_rif and _is_non_interactive_terminal_ipython(ip):
+            ip.enable_gui(backend2gui_rif)
 
     @contextmanager
     def _idle_draw_cntx(self):
@@ -1829,10 +1824,7 @@ class FigureCanvasBase:
         This method will call all functions connected to the 'scroll_event'
         with a `MouseEvent` instance.
         """
-        if step >= 0:
-            self._button = 'up'
-        else:
-            self._button = 'down'
+        self._button = 'up' if step >= 0 else 'down'
         s = 'scroll_event'
         mouseevent = MouseEvent(s, self, x, y, self._button, self._key,
                                 step=step, guiEvent=guiEvent)
@@ -1965,12 +1957,7 @@ class FigureCanvasBase:
         """
         axes_list = [a for a in self.figure.get_axes()
                      if a.patch.contains_point(xy) and a.get_visible()]
-        if axes_list:
-            axes = cbook._topmost_artist(axes_list)
-        else:
-            axes = None
-
-        return axes
+        return cbook._topmost_artist(axes_list) if axes_list else None
 
     def grab_mouse(self, ax):
         """
@@ -2266,8 +2253,7 @@ class FigureCanvasBase:
                     else '')
         basename = (basename or 'image').replace(' ', '_')
         filetype = self.get_default_filetype()
-        filename = basename + '.' + filetype
-        return filename
+        return basename + '.' + filetype
 
     def switch_backends(self, FigureCanvasClass):
         """
@@ -3500,8 +3486,7 @@ class _Backend:
     def new_figure_manager_given_figure(cls, num, figure):
         """Create a new figure manager instance for the given figure."""
         canvas = cls.FigureCanvas(figure)
-        manager = cls.FigureManager(canvas, num)
-        return manager
+        return cls.FigureManager(canvas, num)
 
     @classmethod
     def draw_if_interactive(cls):

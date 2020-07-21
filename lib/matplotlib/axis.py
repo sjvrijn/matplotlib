@@ -132,10 +132,7 @@ class Tick(martist.Artist):
         self._set_labelrotation(labelrotation)
 
         if zorder is None:
-            if major:
-                zorder = mlines.Line2D.zorder + 0.01
-            else:
-                zorder = mlines.Line2D.zorder
+            zorder = mlines.Line2D.zorder + 0.01 if major else mlines.Line2D.zorder
         self._zorder = zorder
 
         if grid_color is None:
@@ -225,9 +222,8 @@ class Tick(martist.Artist):
         return self._size * padding[self._tickdir]
 
     def get_children(self):
-        children = [self.tick1line, self.tick2line,
+        return [self.tick1line, self.tick2line,
                     self.gridline, self.label1, self.label2]
-        return children
 
     def set_clip_path(self, clippath, transform=None):
         # docstring inherited
@@ -705,8 +701,8 @@ class Axis(martist.Artist):
         self.pickradius = pickradius
 
         # Initialize here for testing; later add API
-        self._major_tick_kw = dict()
-        self._minor_tick_kw = dict()
+        self._major_tick_kw = {}
+        self._minor_tick_kw = {}
 
         self.cla()
         self._set_scale('linear')
@@ -1437,17 +1433,11 @@ class Axis(martist.Artist):
         gridkw = {'grid_' + item[0]: item[1] for item in kwargs.items()}
 
         if which in ['minor', 'both']:
-            if b is None:
-                self._gridOnMinor = not self._gridOnMinor
-            else:
-                self._gridOnMinor = b
+            self._gridOnMinor = not self._gridOnMinor if b is None else b
             self.set_tick_params(which='minor', gridOn=self._gridOnMinor,
                                  **gridkw)
         if which in ['major', 'both']:
-            if b is None:
-                self._gridOnMajor = not self._gridOnMajor
-            else:
-                self._gridOnMajor = b
+            self._gridOnMajor = not self._gridOnMajor if b is None else b
             self.set_tick_params(which='major', gridOn=self._gridOnMajor,
                                  **gridkw)
         self.stale = True
@@ -2013,10 +2003,7 @@ class XAxis(Axis):
         return inaxis, {}
 
     def _get_tick(self, major):
-        if major:
-            tick_kw = self._major_tick_kw
-        else:
-            tick_kw = self._minor_tick_kw
+        tick_kw = self._major_tick_kw if major else self._minor_tick_kw
         return XTick(self.axes, 0, major=major, **tick_kw)
 
     def set_label_position(self, position):
@@ -2156,27 +2143,27 @@ class XAxis(Axis):
         """
         cbook._check_in_list(['top', 'bottom', 'both', 'default', 'none'],
                              position=position)
-        if position == 'top':
-            self.set_tick_params(which='both', top=True, labeltop=True,
-                                 bottom=False, labelbottom=False)
-            self._tick_position = 'top'
-            self.offsetText.set_verticalalignment('bottom')
+        if position == 'both':
+            self.set_tick_params(which='both', top=True,
+                                 bottom=True)
         elif position == 'bottom':
             self.set_tick_params(which='both', top=False, labeltop=False,
                                  bottom=True, labelbottom=True)
             self._tick_position = 'bottom'
             self.offsetText.set_verticalalignment('top')
-        elif position == 'both':
-            self.set_tick_params(which='both', top=True,
-                                 bottom=True)
-        elif position == 'none':
-            self.set_tick_params(which='both', top=False,
-                                 bottom=False)
         elif position == 'default':
             self.set_tick_params(which='both', top=True, labeltop=False,
                                  bottom=True, labelbottom=True)
             self._tick_position = 'bottom'
             self.offsetText.set_verticalalignment('top')
+        elif position == 'none':
+            self.set_tick_params(which='both', top=False,
+                                 bottom=False)
+        elif position == 'top':
+            self.set_tick_params(which='both', top=True, labeltop=True,
+                                 bottom=False, labelbottom=False)
+            self._tick_position = 'top'
+            self.offsetText.set_verticalalignment('bottom')
         else:
             assert False, "unhandled parameter not caught by _check_in_list"
         self.stale = True
@@ -2232,17 +2219,16 @@ class XAxis(Axis):
         xmin, xmax = 0., 1.
         dataMutated = self.axes.dataLim.mutatedx()
         viewMutated = self.axes.viewLim.mutatedx()
-        if not dataMutated or not viewMutated:
-            if self.converter is not None:
-                info = self.converter.axisinfo(self.units, self)
-                if info.default_limits is not None:
-                    valmin, valmax = info.default_limits
-                    xmin = self.converter.convert(valmin, self.units, self)
-                    xmax = self.converter.convert(valmax, self.units, self)
-            if not dataMutated:
-                self.axes.dataLim.intervalx = xmin, xmax
-            if not viewMutated:
-                self.axes.viewLim.intervalx = xmin, xmax
+        if (not dataMutated or not viewMutated) and self.converter is not None:
+            info = self.converter.axisinfo(self.units, self)
+            if info.default_limits is not None:
+                valmin, valmax = info.default_limits
+                xmin = self.converter.convert(valmin, self.units, self)
+                xmax = self.converter.convert(valmax, self.units, self)
+        if not dataMutated:
+            self.axes.dataLim.intervalx = xmin, xmax
+        if not viewMutated:
+            self.axes.viewLim.intervalx = xmin, xmax
         self.stale = True
 
     def get_tick_space(self):
@@ -2303,10 +2289,7 @@ class YAxis(Axis):
         return inaxis, {}
 
     def _get_tick(self, major):
-        if major:
-            tick_kw = self._major_tick_kw
-        else:
-            tick_kw = self._minor_tick_kw
+        tick_kw = self._major_tick_kw if major else self._minor_tick_kw
         return YTick(self.axes, 0, major=major, **tick_kw)
 
     def set_label_position(self, position):
@@ -2517,17 +2500,16 @@ class YAxis(Axis):
         ymin, ymax = 0., 1.
         dataMutated = self.axes.dataLim.mutatedy()
         viewMutated = self.axes.viewLim.mutatedy()
-        if not dataMutated or not viewMutated:
-            if self.converter is not None:
-                info = self.converter.axisinfo(self.units, self)
-                if info.default_limits is not None:
-                    valmin, valmax = info.default_limits
-                    ymin = self.converter.convert(valmin, self.units, self)
-                    ymax = self.converter.convert(valmax, self.units, self)
-            if not dataMutated:
-                self.axes.dataLim.intervaly = ymin, ymax
-            if not viewMutated:
-                self.axes.viewLim.intervaly = ymin, ymax
+        if (not dataMutated or not viewMutated) and self.converter is not None:
+            info = self.converter.axisinfo(self.units, self)
+            if info.default_limits is not None:
+                valmin, valmax = info.default_limits
+                ymin = self.converter.convert(valmin, self.units, self)
+                ymax = self.converter.convert(valmax, self.units, self)
+        if not dataMutated:
+            self.axes.dataLim.intervaly = ymin, ymax
+        if not viewMutated:
+            self.axes.viewLim.intervaly = ymin, ymax
         self.stale = True
 
     def get_tick_space(self):

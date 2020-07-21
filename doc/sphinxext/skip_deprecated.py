@@ -13,5 +13,4 @@ def skip_deprecated(app, what, name, obj, skip, options):
 def setup(app):
     app.connect('autodoc-skip-member', skip_deprecated)
 
-    metadata = {'parallel_read_safe': True, 'parallel_write_safe': True}
-    return metadata
+    return {'parallel_read_safe': True, 'parallel_write_safe': True}

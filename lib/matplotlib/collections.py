@@ -599,8 +599,8 @@ class Collection(artist.Artist, cm.ScalarMappable):
         """
         if lw is None:
             lw = mpl.rcParams['patch.linewidth']
-            if lw is None:
-                lw = mpl.rcParams['lines.linewidth']
+        if lw is None:
+            lw = mpl.rcParams['lines.linewidth']
         # get the un-scaled/broadcast lw
         self._us_lw = np.atleast_1d(np.asarray(lw))
 
@@ -1434,11 +1434,10 @@ class LineCollection(Collection):
         offsets = self._uniform_offsets
         Nsegs = len(segs)
         Noffs = offsets.shape[0]
-        if Noffs == 1:
-            for i in range(Nsegs):
+        for i in range(Nsegs):
+            if Noffs == 1:
                 segs[i] = segs[i] + i * offsets
-        else:
-            for i in range(Nsegs):
+            else:
                 io = i % Noffs
                 segs[i] = segs[i] + offsets[io:io + 1]
         return segs
@@ -1726,22 +1725,22 @@ class EllipseCollection(Collection):
         ax = self.axes
         fig = self.figure
 
-        if self._units == 'xy':
-            sc = 1
-        elif self._units == 'x':
-            sc = ax.bbox.width / ax.viewLim.width
-        elif self._units == 'y':
-            sc = ax.bbox.height / ax.viewLim.height
+        if self._units == 'dots':
+            sc = 1.0
+        elif self._units == 'height':
+            sc = ax.bbox.height
         elif self._units == 'inches':
             sc = fig.dpi
         elif self._units == 'points':
             sc = fig.dpi / 72.0
         elif self._units == 'width':
             sc = ax.bbox.width
-        elif self._units == 'height':
-            sc = ax.bbox.height
-        elif self._units == 'dots':
-            sc = 1.0
+        elif self._units == 'x':
+            sc = ax.bbox.width / ax.viewLim.width
+        elif self._units == 'xy':
+            sc = 1
+        elif self._units == 'y':
+            sc = ax.bbox.height / ax.viewLim.height
         else:
             raise ValueError('unrecognized units: %s' % self._units)
 
@@ -2017,11 +2016,10 @@ class QuadMesh(Collection):
         transOffset = self.get_offset_transform()
         offsets = self._offsets
 
-        if self.have_units():
-            if len(self._offsets):
-                xs = self.convert_xunits(self._offsets[:, 0])
-                ys = self.convert_yunits(self._offsets[:, 1])
-                offsets = np.column_stack([xs, ys])
+        if self.have_units() and len(offsets):
+            xs = self.convert_xunits(self._offsets[:, 0])
+            ys = self.convert_yunits(self._offsets[:, 1])
+            offsets = np.column_stack([xs, ys])
 
         self.update_scalarmappable()
 

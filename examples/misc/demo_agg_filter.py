@@ -54,8 +54,7 @@ class OffsetFilter(BaseFilter):
     def process_image(self, padded_src, dpi):
         ox, oy = self.offsets
         a1 = np.roll(padded_src, int(ox / 72 * dpi), axis=1)
-        a2 = np.roll(a1, -int(oy / 72 * dpi), axis=0)
-        return a2
+        return np.roll(a1, -int(oy / 72 * dpi), axis=0)
 
 
 class GaussianFilter(BaseFilter):
@@ -89,8 +88,7 @@ class DropShadowFilter(BaseFilter):
 
     def process_image(self, padded_src, dpi):
         t1 = self.gauss_filter.process_image(padded_src, dpi)
-        t2 = self.offset_filter.process_image(t1, dpi)
-        return t2
+        return self.offset_filter.process_image(t1, dpi)
 
 
 class LightFilter(BaseFilter):

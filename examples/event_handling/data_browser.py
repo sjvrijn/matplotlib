@@ -32,11 +32,7 @@ class PointBrowser:
             return
         if event.key not in ('n', 'p'):
             return
-        if event.key == 'n':
-            inc = 1
-        else:
-            inc = -1
-
+        inc = 1 if event.key == 'n' else -1
         self.lastind += inc
         self.lastind = np.clip(self.lastind, 0, len(xs) - 1)
         self.update()

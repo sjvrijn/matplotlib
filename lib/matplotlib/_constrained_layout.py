@@ -136,7 +136,7 @@ def do_constrained_layout(fig, renderer, h_pad, w_pad,
             gs = ax.get_subplotspec().get_gridspec()
             if gs._layoutbox is not None:
                 gss.add(gs)
-    if len(gss) == 0:
+    if not gss:
         cbook._warn_external('There are no gridspecs with layoutboxes. '
                              'Possibly did not call parent GridSpec with the'
                              ' figure= keyword')
@@ -262,11 +262,7 @@ def _make_layout_margins(ax, renderer, h_pad, w_pad):
     except TypeError:
         tightbbox = ax.get_tightbbox(renderer=renderer)
 
-    if tightbbox is None:
-        bbox = pos
-    else:
-        bbox = invTransFig(tightbbox)
-
+    bbox = pos if tightbbox is None else invTransFig(tightbbox)
     # this can go wrong:
     if not (np.isfinite(bbox.width) and np.isfinite(bbox.height)):
         # just abort, this is likely a bad set of coordinates that

@@ -49,10 +49,7 @@ class NorthEastHatch(HatchPatternBase):
     def __init__(self, hatch, density):
         self.num_lines = int(
             (hatch.count('/') + hatch.count('x') + hatch.count('X')) * density)
-        if self.num_lines:
-            self.num_vertices = (self.num_lines + 1) * 2
-        else:
-            self.num_vertices = 0
+        self.num_vertices = (self.num_lines + 1) * 2 if self.num_lines else 0
 
     def set_vertices_and_codes(self, vertices, codes):
         steps = np.linspace(-0.5, 0.5, self.num_lines + 1)
@@ -69,10 +66,7 @@ class SouthEastHatch(HatchPatternBase):
         self.num_lines = int(
             (hatch.count('\\') + hatch.count('x') + hatch.count('X'))
             * density)
-        if self.num_lines:
-            self.num_vertices = (self.num_lines + 1) * 2
-        else:
-            self.num_vertices = 0
+        self.num_vertices = (self.num_lines + 1) * 2 if self.num_lines else 0
 
     def set_vertices_and_codes(self, vertices, codes):
         steps = np.linspace(-0.5, 0.5, self.num_lines + 1)
@@ -184,8 +178,8 @@ _hatch_types = [
 
 
 def _validate_hatch_pattern(hatch):
-    valid_hatch_patterns = set(r'-+|/\xXoO.*')
     if hatch is not None:
+        valid_hatch_patterns = set(r'-+|/\xXoO.*')
         invalids = set(hatch).difference(valid_hatch_patterns)
         if invalids:
             valid = ''.join(sorted(valid_hatch_patterns))
@@ -209,7 +203,7 @@ def get_path(hatchpattern, density=6):
 
     patterns = [hatch_type(hatchpattern, density)
                 for hatch_type in _hatch_types]
-    num_vertices = sum([pattern.num_vertices for pattern in patterns])
+    num_vertices = sum(pattern.num_vertices for pattern in patterns)
 
     if num_vertices == 0:
         return Path(np.empty((0, 2)))
